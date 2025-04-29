@@ -1,0 +1,19 @@
+.header-container {
+  width: 100%;
+  height: 400px;
+  background-color: aqua;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.cities-display {
+  display: flex;
+  gap: 35px;
+}
+
+.stops-display {
+  display: flex;
+  gap: 35px;
+}

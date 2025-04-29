@@ -27,5 +27,6 @@ class CitySerializer(serializers.ModelSerializer):
             'latitude',
             'longitude',
             'photo',
+            'interestPoints',
         ]
         read_only_fields = ['slug', 'photo']

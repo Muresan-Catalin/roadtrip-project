@@ -1,0 +1,87 @@
+.city-card-container {
+  width: 300px;
+  height: 350px; /* ✅ same for every card */
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+.city-card-container img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.text-container {
+  flex: 1; /* grow to fill the middle */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* title+points at top, distance+button at bottom */
+  padding: 16px;
+}
+
+.text-container h2 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111;
+  text-align: left;
+}
+
+.text-container ul {
+  margin: 0 0 16px;
+  padding-left: 20px;
+  color: #333;
+}
+
+.text-container ul li {
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.text-container .distance {
+  margin-top: auto;
+  font-size: 0.9rem;
+  color: #666;
+  text-align: left;
+}
+
+.card-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.delete-button {
+  display: inline-block;
+  outline: 0;
+  cursor: pointer;
+  padding: 5px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  vertical-align: middle;
+  border: 1px solid;
+  border-radius: 6px;
+  color: red;
+  background-color: #fafbfc;
+  border-color: #1b1f2326;
+  box-shadow: rgba(27, 31, 35, 0.04) 0px 1px 0px 0px,
+    rgba(255, 255, 255, 0.25) 0px 1px 0px 0px inset;
+  transition: 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  transition-property: color, background-color, border-color;
+}
+
+.delete-button:hover {
+  color: #ffffff;
+  background-color: red;
+  border-color: #1b1f2326;
+  box-shadow: rgba(27, 31, 35, 0.1) 0px 1px 0px 0px,
+    rgba(255, 255, 255, 0.03) 0px 1px 0px 0px inset;
+  transition-duration: 0.1s;
+}

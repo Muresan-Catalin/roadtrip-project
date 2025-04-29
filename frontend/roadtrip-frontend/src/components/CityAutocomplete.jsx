@@ -1,14 +1,8 @@
-// src/components/CityAutocomplete.jsx
-
 import React, { useState, useEffect } from "react";
 import { getCities } from "../api/cities";
+import "../styles/CityAutocompleteStyle.css";
 
-export default function CityAutocomplete({
-  countryName,
-  value,
-  onChange,
-  label,
-}) {
+export default function CityAutocomplete({ countryName, onChange }) {
   const [allCities, setAllCities] = useState([]);
   const [query, setQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -82,72 +76,56 @@ export default function CityAutocomplete({
     : [];
 
   return (
-    <div style={{ position: "relative" }}>
-      <label>
-        {label}
-        <input
-          type="text"
-          placeholder="search a city"
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setShowSuggestions(true);
-          }}
-          onKeyDown={(e) => {
-            if (
-              (e.key === "Enter" || e.key === "Tab") &&
-              suggestions.length > 0
-            ) {
-              e.preventDefault();
-              const first = suggestions[0];
-              setQuery(first.name);
-              onChange(first.id);
-              setShowSuggestions(false);
-              setQuery("");
-            }
-          }}
-          autoComplete="off"
-        />
-      </label>
+    <div>
+      <input
+        className="input"
+        type="text"
+        placeholder="search a city"
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setShowSuggestions(true);
+        }}
+        onKeyDown={(e) => {
+          if (
+            (e.key === "Enter" || e.key === "Tab") &&
+            suggestions.length > 0
+          ) {
+            e.preventDefault();
+            const first = suggestions[0];
+            setQuery(first.name);
+            onChange(first.id);
+            setShowSuggestions(false);
+            setQuery("");
+          }
+        }}
+        autoComplete="off"
+      />
 
       {query && showSuggestions && (
-        <ul
-          style={{
-            listStyle: "none",
-            margin: 0,
-            padding: "0.5rem",
-            border: "1px solid #ccc",
-            position: "absolute",
-            background: "white",
-            width: "100%",
-            maxHeight: "150px",
-            overflowY: "auto",
-            zIndex: 10,
-          }}
-        >
+        <div className="suggestions-container">
           {suggestions.length > 0 ? (
             suggestions.map((c) => (
-              <li
+              <p
                 key={c.id}
-                style={{ padding: "0.25rem 0", cursor: "pointer" }}
+                className="suggestions"
                 onClick={() => {
                   setQuery(c.name);
                   onChange(c.id);
                   setShowSuggestions(false);
                 }}
               >
-                <span style={{ marginRight: "0.5em" }}>
-                  {europeFlags[c.country_code]}
+                <span>
+                  {europeFlags[c.country_code]} {c.name}, {c.country}
                 </span>
-                {c.name}, {c.country}
-              </li>
+              </p>
             ))
           ) : (
             <li style={{ color: "#888", padding: "0.25rem 0" }}>
               No city with this name available
             </li>
           )}
-        </ul>
+        </div>
       )}
     </div>
   );

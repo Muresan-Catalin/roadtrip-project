@@ -1,17 +1,8 @@
 import React, { useState, useEffect } from "react";
+import "../styles/CityCardStyle.css";
 
-// Helper to turn 'RO' → '🇷🇴'
-function emojiFlag(countryCode) {
-  if (!countryCode) return "";
-  return countryCode
-    .toUpperCase()
-    .replace(/./g, (char) =>
-      String.fromCodePoint(0x1f1e6 + char.charCodeAt(0) - 65)
-    );
-}
-
-export default function CityCard({ city, distance = [], index }) {
-  const { name, country, country_code, photo } = city;
+export default function CityCard({ city, distance = [], index, onDelete }) {
+  const { name, country, photo, interestPoints } = city;
 
   // build the photo URL if one exists
   const photoUrl = photo
@@ -28,6 +19,8 @@ export default function CityCard({ city, distance = [], index }) {
   // loading state: true until we have that leg
   const [loading, setLoading] = useState(true);
 
+  const interestPointsArray = interestPoints.split(",");
+
   useEffect(() => {
     // whenever distance array or index changes, update loading
     if (typeof index !== "number") {
@@ -41,6 +34,7 @@ export default function CityCard({ city, distance = [], index }) {
 
   return (
     <div
+      className="city-card-container"
       style={{
         display: "flex",
         alignItems: "flex-start",
@@ -48,33 +42,50 @@ export default function CityCard({ city, distance = [], index }) {
         marginTop: "2rem",
       }}
     >
-      {photoUrl && (
-        <img
-          src={photoUrl}
-          alt={name}
-          style={{ width: "100px", height: "auto", borderRadius: "8px" }}
-        />
-      )}
+      {photoUrl && <img src={photoUrl} alt={name} />}
 
-      <div>
-        <h2 style={{ margin: 0 }}>
-          {emojiFlag(country_code)} {name}, {country}
-        </h2>
+      <div className="text-container">
+        <div>
+          <h2 className="city-name">
+            {name}, {country}
+          </h2>
+
+          <div>
+            {interestPointsArray.map((point, index) => (
+              <li key={index}>{point}</li>
+            ))}
+          </div>
+        </div>
 
         {/* distance display */}
-        {typeof index === "number" &&
-          (loading ? (
-            <p style={{ margin: "0.5rem 0 0", fontStyle: "italic" }}>
-              Loading distance…
-            </p>
-          ) : (
-            fromName &&
-            km && (
-              <p style={{ margin: "0.5rem 0 0" }}>
-                {km} km from <strong>{fromName}</strong>
-              </p>
-            )
-          ))}
+        <div className="card-footer">
+          <div>
+            {typeof index === "number" &&
+              (loading ? (
+                <p
+                  className="loading-distance"
+                  style={{ margin: "0.5rem 0 0", fontStyle: "italic" }}
+                >
+                  Loading distance…
+                </p>
+              ) : (
+                fromName &&
+                km && (
+                  <p className="distance" style={{ margin: "0.5rem 0 0" }}>
+                    {km} km from <strong>{fromName}</strong>
+                  </p>
+                )
+              ))}
+          </div>
+
+          <div>
+            {onDelete && (
+              <button className="delete-button" onClick={onDelete}>
+                Remove city
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

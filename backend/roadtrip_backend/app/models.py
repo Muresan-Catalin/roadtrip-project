@@ -43,6 +43,13 @@ class City(models.Model):
         help_text='Upload image of city'
     )
 
+    interestPoints = models.CharField(
+        max_length=200,
+        help_text="3 interest points divided by ,",
+        null=True,
+        blank=True
+    )
+
     latitude = models.FloatField()
     longitude = models.FloatField()
 

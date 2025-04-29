@@ -1,8 +1,8 @@
-// src/pages/BuildItineraryPage.jsx
 import React, { useState, useEffect, useRef } from "react";
 import CityAutocomplete from "../components/CityAutocomplete";
 import { getCities } from "../api/cities";
 import CityCard from "../components/CityCard";
+import "../styles/BuildItineraryStyle.css";
 
 export default function BuildItineraryPage() {
   const [allCities, setAllCities] = useState([]);
@@ -117,37 +117,58 @@ export default function BuildItineraryPage() {
     prevStopsLenRef.current = newStops.length;
   }
 
+  function ClearAll() {
+    setStartCity(null);
+    setStartCityId(null);
+    setStops([]);
+    setDistance([]);
+  }
+
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Plan Your Roadtrip</h1>
+    <>
+      <div className="header-container">
+        <h1>Plan Your Roadtrip</h1>
 
-      {/* Start Location Picker */}
-      <div style={{ margin: "1rem 0" }}>
-        <label style={{ display: "block", marginBottom: ".5rem" }}>
-          Start Location:
-        </label>
-        <CityAutocomplete
-          value={startCityId}
-          onChange={setStartCityId}
-          label=""
-        />
-      </div>
-      {startCity && <CityCard city={startCity} />}
-
-      {startCity && (
+        {/* Start Location Picker */}
         <div>
-          <h2>Select stops</h2>
-          <CityAutocomplete value={null} onChange={handleAddStop} label="" />
-
-          <h3>Stops</h3>
-          {stops.map((c, idx) => (
-            <div key={c.id} style={{ marginBottom: "1rem" }}>
-              <CityCard city={c} distance={distance} index={idx} />
-              <button onClick={() => handleDeleteStop(c.id)}>Delete</button>
-            </div>
-          ))}
+          {startCityId === null ? (
+            <CityAutocomplete
+              value={startCityId}
+              onChange={setStartCityId}
+              label=""
+            />
+          ) : (
+            <CityAutocomplete value={null} onChange={handleAddStop} />
+          )}
         </div>
-      )}
-    </div>
+        <div>
+          {startCity && (
+            <button className="clear-button" onClick={ClearAll}>
+              Clear All
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="cities-display">
+        {startCity && <CityCard city={startCity} />}
+
+        {startCity && (
+          <div className="stops-display">
+            {stops.map((c, idx) => (
+              <div key={c.id} style={{ marginBottom: "1rem" }}>
+                <CityCard
+                  city={c}
+                  distance={distance}
+                  index={idx}
+                  onDelete={() => handleDeleteStop(c.id)}
+                />
+                {/* <button onClick={() => handleDeleteStop(c.id)}>Delete</button> */}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
