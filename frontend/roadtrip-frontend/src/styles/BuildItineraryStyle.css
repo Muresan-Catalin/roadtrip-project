@@ -1,15 +1,55 @@
 .header-container {
+  margin: 0;
+  padding: 0;
   width: 100%;
-  height: 400px;
-  background-color: aqua;
+  height: 570px;
+  background-image: url("../assets/bg5.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: scroll;
+  background-size: cover;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
 }
 
+.title-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+.title-input h1 {
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+  font-size: 5rem;
+  color: white;
+}
+
+.title-input > p {
+  text-align: center;
+  padding: 0;
+  margin: 0;
+  font-size: 2.3rem;
+  color: white;
+  font-weight: 100;
+  padding-bottom: 2rem;
+}
+
+.search {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+
 .cities-display {
   display: flex;
+  justify-content: center;
   gap: 35px;
 }
 

@@ -1,7 +1,7 @@
 .input {
   border: 2px solid transparent;
-  width: 25em;
-  height: 2.5em;
+  width: 30em;
+  height: 3em;
   padding-left: 0.8em;
   outline: none;
   overflow: hidden;
@@ -24,7 +24,7 @@
   padding: 5px 16px;
   font-size: 14px;
   font-weight: 500;
-  line-height: 20px;
+  line-height: 34px;
   vertical-align: middle;
   border: 1px solid;
   border-radius: 6px;
@@ -46,16 +46,27 @@
   transition-duration: 0.1s;
 }
 
+.city-autocomplete-wrapper {
+  position: relative;
+  width: 26em; /* match your input width */
+  margin: 0 auto;
+}
+
 .suggestions-container {
-  background-color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  gap: 5px;
-  margin-top: 3px;
+  position: absolute;
+  top: 100%; /* sit just below the input */
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 200px; /* or whatever fits your design */
+  overflow-y: auto; /* scroll if there are too many items */
+  z-index: 10; /* sit on top of other content */
 }
 
 .suggestions {
+  color: black;
   cursor: pointer;
   border: 1px solid black;
   padding: 0px 0px 0px 5px;
@@ -65,6 +76,5 @@
 }
 
 .suggestions:hover {
-  background-color: blue;
-  color: white;
+  background-color: #d2d4d2;
 }

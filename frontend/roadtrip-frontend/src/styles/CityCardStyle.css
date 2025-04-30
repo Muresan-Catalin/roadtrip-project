@@ -1,6 +1,7 @@
 .city-card-container {
   width: 300px;
   height: 350px; /* ✅ same for every card */
+  margin: 0px 0px 20px 20px;
   display: flex;
   flex-direction: column;
   background: #fff;
@@ -8,6 +9,20 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   font-family: sans-serif;
+  opacity: 1;
+  animation-name: fadeInOpacity;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-in;
+  animation-duration: 0.3s;
+}
+
+@keyframes fadeInOpacity {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .city-card-container img {
@@ -84,4 +99,10 @@
   box-shadow: rgba(27, 31, 35, 0.1) 0px 1px 0px 0px,
     rgba(255, 255, 255, 0.03) 0px 1px 0px 0px inset;
   transition-duration: 0.1s;
+}
+
+.starting-city {
+  color: green;
+  font-size: 1.5em;
+  font-weight: bold;
 }

@@ -76,7 +76,7 @@ export default function CityAutocomplete({ countryName, onChange }) {
     : [];
 
   return (
-    <div>
+    <div className="city-autocomplete-wrapper">
       <input
         className="input"
         type="text"
@@ -121,9 +121,7 @@ export default function CityAutocomplete({ countryName, onChange }) {
               </p>
             ))
           ) : (
-            <li style={{ color: "#888", padding: "0.25rem 0" }}>
-              No city with this name available
-            </li>
+            <p className="suggestions">No city with this name available</p>
           )}
         </div>
       )}

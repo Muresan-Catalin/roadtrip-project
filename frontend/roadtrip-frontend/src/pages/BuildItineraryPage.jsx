@@ -3,6 +3,7 @@ import CityAutocomplete from "../components/CityAutocomplete";
 import { getCities } from "../api/cities";
 import CityCard from "../components/CityCard";
 import "../styles/BuildItineraryStyle.css";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function BuildItineraryPage() {
   const [allCities, setAllCities] = useState([]);
@@ -127,47 +128,77 @@ export default function BuildItineraryPage() {
   return (
     <>
       <div className="header-container">
-        <h1>Plan Your Roadtrip</h1>
+        <div className="title-input">
+          <h1>Plan Your Roadtrip</h1>
+          <p>
+            Your roadtrip plan is a few clicks away
+            <br />
+            Start adding cities and begin your adventure
+          </p>
 
-        {/* Start Location Picker */}
-        <div>
-          {startCityId === null ? (
-            <CityAutocomplete
-              value={startCityId}
-              onChange={setStartCityId}
-              label=""
-            />
-          ) : (
-            <CityAutocomplete value={null} onChange={handleAddStop} />
-          )}
-        </div>
-        <div>
-          {startCity && (
-            <button className="clear-button" onClick={ClearAll}>
-              Clear All
-            </button>
-          )}
+          {/* Start Location Picker */}
+          <div className="search">
+            <div>
+              {startCityId === null ? (
+                <CityAutocomplete
+                  value={startCityId}
+                  onChange={setStartCityId}
+                  label=""
+                />
+              ) : (
+                <CityAutocomplete value={null} onChange={handleAddStop} />
+              )}
+            </div>
+            <div>
+              {startCity && (
+                <button className="clear-button" onClick={ClearAll}>
+                  Clear All
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="cities-display">
-        {startCity && <CityCard city={startCity} />}
+        <AnimatePresence initial={false}>
+          {/* 1) Start City */}
+          {startCity && (
+            <motion.div
+              key={`start-${startCity.id}`}
+              layout
+              // no enter animation for the very first card
+              initial={false}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ layout: { duration: 0.4, ease: "easeOut" } }}
+            >
+              <CityCard city={startCity} />
+            </motion.div>
+          )}
 
-        {startCity && (
-          <div className="stops-display">
-            {stops.map((c, idx) => (
-              <div key={c.id} style={{ marginBottom: "1rem" }}>
-                <CityCard
-                  city={c}
-                  distance={distance}
-                  index={idx}
-                  onDelete={() => handleDeleteStop(c.id)}
-                />
-                {/* <button onClick={() => handleDeleteStop(c.id)}>Delete</button> */}
-              </div>
-            ))}
-          </div>
-        )}
+          {/* 2) Stops */}
+          {stops.map((c, idx) => (
+            <motion.div
+              key={c.id}
+              layout
+              // fade + slide in for new cards, but *delay* until after layout
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{
+                layout: { duration: 0.4, ease: "easeOut" },
+                default: { duration: 0.3, delay: 0.4 },
+              }}
+            >
+              <CityCard
+                city={c}
+                distance={distance}
+                index={idx}
+                onDelete={() => handleDeleteStop(c.id)}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </>
   );

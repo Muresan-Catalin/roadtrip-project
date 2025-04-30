@@ -85,6 +85,13 @@ export default function CityCard({ city, distance = [], index, onDelete }) {
               </button>
             )}
           </div>
+          <div>
+            {index >= 0 ? (
+              <p className="index">{index + 1}</p>
+            ) : (
+              <p className="starting-city">Starting city</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
