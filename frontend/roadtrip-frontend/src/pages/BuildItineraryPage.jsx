@@ -1,9 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
-import CityAutocomplete from "../components/CityAutocomplete";
-import { getCities } from "../api/cities";
-import CityCard from "../components/CityCard";
-import "../styles/BuildItineraryStyle.css";
+// src/pages/BuildItineraryPage.jsx
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+
+import CityAutocomplete from "../components/CityAutocomplete";
+import CityCard from "../components/CityCard";
+import Info from "../components/Info";
+import { getCities } from "../api/cities";
+
+import "../styles/BuildItineraryStyle.css";
 
 export default function BuildItineraryPage() {
   const [allCities, setAllCities] = useState([]);
@@ -11,16 +15,18 @@ export default function BuildItineraryPage() {
   const [startCity, setStartCity] = useState(null);
   const [stops, setStops] = useState([]);
   const [distance, setDistance] = useState([]);
-
-  // Track previous stops length so we know when it's an add vs delete
   const prevStopsLenRef = useRef(0);
 
-  // 1) Fetch cities once
+  // ref + state for measuring the full height of the cards container
+  const contentRef = useRef(null);
+  const [citiesHeight, setCitiesHeight] = useState(0);
+
+  // 1) Fetch once
   useEffect(() => {
     getCities().then(setAllCities);
   }, []);
 
-  // 2) When startCity changes, reset everything
+  // 2) Reset when startCity changes
   useEffect(() => {
     if (startCityId != null) {
       setStartCity(allCities.find((c) => c.id === startCityId) || null);
@@ -32,20 +38,16 @@ export default function BuildItineraryPage() {
     prevStopsLenRef.current = 0;
   }, [startCityId, allCities]);
 
-  // 3) Only run on **add** (stops.length > previous), calculate that new leg
+  // 3) Only on **add** stops, fetch that leg
   useEffect(() => {
-    const prevLen = prevStopsLenRef.current;
-    const currLen = stops.length;
-    // Update the ref for next time
-    prevStopsLenRef.current = currLen;
+    const prev = prevStopsLenRef.current;
+    const curr = stops.length;
+    prevStopsLenRef.current = curr;
+    if (curr === 0 || curr <= prev) return;
 
-    // If no stops or this was a delete, bail out
-    if (currLen === 0 || currLen <= prevLen) return;
-
-    // Calculate the latest leg
-    const fromCity = currLen === 1 ? startCity : stops[currLen - 2];
-    const toCity = stops[currLen - 1];
-    if (!fromCity || !toCity) return;
+    const from = curr === 1 ? startCity : stops[curr - 2];
+    const to = stops[curr - 1];
+    if (!from || !to) return;
 
     (async () => {
       try {
@@ -53,71 +55,54 @@ export default function BuildItineraryPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            city_a: fromCity.name,
-            city_b: toCity.name,
+            city_a: from.name,
+            city_b: to.name,
           }),
         });
         const data = await res.json();
         if (res.ok) {
-          setDistance((prev) => [
-            ...prev,
-            { from: fromCity, to: toCity, km: data.distance_km },
-          ]);
-        } else {
-          console.error("Error fetching distance:", data.detail);
+          setDistance((d) => [...d, { from, to, km: data.distance_km }]);
         }
       } catch (err) {
-        console.error("Fetch error:", err);
+        console.error(err);
       }
     })();
   }, [startCity, stops]);
 
-  // 4) Your original add-stop stays exactly the same
+  // 4) Add / delete handlers
   function handleAddStop(id) {
     const city = allCities.find((c) => c.id === id);
     if (city && stops.length < 5 && !stops.some((s) => s.id === id)) {
       setStops([...stops, city]);
     }
   }
-
-  // 5) On delete: clear old distances and recalc **all** legs
   async function handleDeleteStop(id) {
     const newStops = stops.filter((s) => s.id !== id);
     setStops(newStops);
-    setDistance([]); // wipe prior distances
-
-    // Rebuild every leg in order
+    setDistance([]);
     for (let i = 0; i < newStops.length; i++) {
-      const fromCity = i === 0 ? startCity : newStops[i - 1];
-      const toCity = newStops[i];
-      if (!fromCity || !toCity) continue;
-
+      const from = i === 0 ? startCity : newStops[i - 1];
+      const to = newStops[i];
+      if (!from || !to) continue;
       try {
         const res = await fetch("http://127.0.0.1:8000/api/distance/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            city_a: fromCity.name,
-            city_b: toCity.name,
+            city_a: from.name,
+            city_b: to.name,
           }),
         });
         const data = await res.json();
         if (res.ok) {
-          setDistance((prev) => [
-            ...prev,
-            { from: fromCity, to: toCity, km: data.distance_km },
-          ]);
-        } else {
-          console.error("Error fetching distance:", data.detail);
+          setDistance((d) => [...d, { from, to, km: data.distance_km }]);
         }
       } catch (err) {
-        console.error("Fetch error:", err);
+        console.error(err);
       }
     }
-    // Reset the previous-length ref so the add-effect stays in sync
     prevStopsLenRef.current = newStops.length;
   }
-
   function ClearAll() {
     setStartCity(null);
     setStartCityId(null);
@@ -125,8 +110,39 @@ export default function BuildItineraryPage() {
     setDistance([]);
   }
 
+  // — animation constants —
+  const SLIDE_DURATION = 0.6; // seconds
+
+  // measure cards-container height any time the list changes
+  useLayoutEffect(() => {
+    if (contentRef.current) {
+      setCitiesHeight(contentRef.current.getBoundingClientRect().height);
+    }
+  }, [startCity, stops]);
+
+  const hasCities = startCity != null;
+
+  // variants for the wrapper that reveals via height
+  const wrapperVariants = {
+    hidden: { height: 0 },
+    visible: {
+      height: citiesHeight,
+      transition: { duration: SLIDE_DURATION, ease: "easeInOut" },
+    },
+  };
+
+  // variants for the cards themselves
+  const cardsVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { delay: SLIDE_DURATION, duration: 0.4 },
+    },
+  };
+
   return (
-    <>
+    <div className="page-container">
       <div className="header-container">
         <div className="title-input">
           <h1>Plan Your Roadtrip</h1>
@@ -135,71 +151,77 @@ export default function BuildItineraryPage() {
             <br />
             Start adding cities and begin your adventure
           </p>
-
-          {/* Start Location Picker */}
           <div className="search">
-            <div>
-              {startCityId === null ? (
-                <CityAutocomplete
-                  value={startCityId}
-                  onChange={setStartCityId}
-                  label=""
-                />
-              ) : (
-                <CityAutocomplete value={null} onChange={handleAddStop} />
-              )}
-            </div>
-            <div>
-              {startCity && (
-                <button className="clear-button" onClick={ClearAll}>
-                  Clear All
-                </button>
-              )}
-            </div>
+            {startCityId === null ? (
+              <CityAutocomplete
+                value={startCityId}
+                onChange={setStartCityId}
+                label=""
+              />
+            ) : (
+              <CityAutocomplete value={null} onChange={handleAddStop} />
+            )}
+            {startCity && (
+              <button className="clear-button" onClick={ClearAll}>
+                Clear All
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="cities-display">
-        <AnimatePresence initial={false}>
-          {/* 1) Start City */}
-          {startCity && (
-            <motion.div
-              key={`start-${startCity.id}`}
-              layout
-              // no enter animation for the very first card
-              initial={false}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ layout: { duration: 0.4, ease: "easeOut" } }}
-            >
-              <CityCard city={startCity} />
-            </motion.div>
-          )}
+      {/* if no cities, just show Info */}
+      {!hasCities && <Info />}
 
-          {/* 2) Stops */}
-          {stops.map((c, idx) => (
+      {/* when cities exist, reveal wrapper → fade in cards → Info sits below and is pushed by wrapper height */}
+      {hasCities && (
+        <>
+          <motion.div
+            className="cities-display-wrapper"
+            initial="hidden"
+            animate="visible"
+            variants={wrapperVariants}
+            style={{ overflow: "hidden" }}
+          >
             <motion.div
-              key={c.id}
-              layout
-              // fade + slide in for new cards, but *delay* until after layout
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{
-                layout: { duration: 0.4, ease: "easeOut" },
-                default: { duration: 0.3, delay: 0.4 },
-              }}
+              ref={contentRef}
+              className="cities-display"
+              initial="hidden"
+              animate="visible"
+              variants={cardsVariants}
             >
-              <CityCard
-                city={c}
-                distance={distance}
-                index={idx}
-                onDelete={() => handleDeleteStop(c.id)}
-              />
+              <AnimatePresence>
+                {startCity && (
+                  <motion.div
+                    key={`start-${startCity.id}`}
+                    layout
+                    exit={{ opacity: 0, scale: 0.8 }}
+                  >
+                    <CityCard city={startCity} />
+                  </motion.div>
+                )}
+                {stops.map((c, idx) => (
+                  <motion.div
+                    key={c.id}
+                    layout
+                    exit={{ opacity: 0, scale: 0.8 }}
+                  >
+                    <CityCard
+                      city={c}
+                      distance={distance}
+                      index={idx}
+                      onDelete={() => handleDeleteStop(c.id)}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
-    </>
+          </motion.div>
+
+          {/* Info just lives below the wrapper and is pushed down smoothly */}
+          <Info />
+        </>
+      )}
+    </div>
   );
 }

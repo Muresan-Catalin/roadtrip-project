@@ -1,0 +1,93 @@
+.info-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.info-container h1 {
+  font-size: 60px;
+}
+
+.line-divider {
+  border: 0;
+  border-top: 8px solid #ff7f50; /* thickness = 6px */
+  width: 150px;
+  margin: 0 auto 2rem;
+  border-radius: 3px;
+}
+
+.cards-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 30px;
+}
+
+.card {
+  box-shadow: 5px 11px 12px 0px rgba(0, 0, 0, 0.2);
+  -webkit-box-shadow: 5px 11px 12px 0px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 5px 11px 12px 0px rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 20em;
+  height: 25em;
+  max-width: 90%;
+  margin: 1em;
+}
+
+.card h2 {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.card p {
+  padding: 15px;
+  text-align: center;
+  font-size: 15px;
+  color: gray;
+}
+
+/* make every video exactly the same size */
+.display-of-info video {
+  width: 100% !important; /* fills the 30%-wide parent */
+  height: 180px !important; /* pick whatever fixed height you like */
+  object-fit: contain !important; /* crops to fill, preserving aspect */
+}
+
+/* Tablet & below: wrap cards */
+@media (max-width: 900px) {
+  .cards-container {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .card {
+    width: 45%;
+  }
+}
+
+/* Mobile: single column, smaller text */
+@media (max-width: 600px) {
+  .info-container h1 {
+    font-size: 2rem;
+  }
+  .cards-container {
+    flex-direction: column;
+  }
+  .card {
+    width: 100%;
+  }
+  .card h2 {
+    font-size: 1.25rem;
+  }
+  .card p {
+    font-size: 0.9rem;
+  }
+}
