@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import country_list, country_detail, city_list, city_detail, driving_distance
+from .views import country_list, country_detail, city_list, city_detail, driving_distance, generate_itinerary_pdf
 
 urlpatterns = [
     path('countries/', country_list, name='country-list'),
@@ -7,4 +7,5 @@ urlpatterns = [
     path('cities/', city_list, name='city-list'),
     path('cities/<int:pk>/', city_detail, name='city-detail'),
     path('distance/', driving_distance, name='driving-distance'),
+    path("itinerary/pdf/", generate_itinerary_pdf, name="itinerary-pdf"),
 ]

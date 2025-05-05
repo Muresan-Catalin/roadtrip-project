@@ -15,11 +15,57 @@ export default function BuildItineraryPage() {
   const [startCity, setStartCity] = useState(null);
   const [stops, setStops] = useState([]);
   const [distance, setDistance] = useState([]);
+  const [downloading, setDownloading] = useState(false);
   const prevStopsLenRef = useRef(0);
 
   // ref + state for measuring the full height of the cards container
   const contentRef = useRef(null);
   const [citiesHeight, setCitiesHeight] = useState(0);
+
+  async function handleDownloadPdf() {
+    if (!startCity) return;
+    setDownloading(true);
+
+    // prepare minimal payload
+    const payload = {
+      startCity: {
+        name: startCity.name,
+        country: startCity.country,
+      },
+      stops: stops.map((s) => ({
+        name: s.name,
+        country: s.country,
+      })),
+      distances: distance.map((d) => ({ km: d.km })),
+    };
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/itinerary/pdf/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(res.statusText);
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "itinerary.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("PDF download failed:", err);
+      alert("Could not generate PDF. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   // 1) Fetch once
   useEffect(() => {
@@ -62,6 +108,7 @@ export default function BuildItineraryPage() {
         const data = await res.json();
         if (res.ok) {
           setDistance((d) => [...d, { from, to, km: data.distance_km }]);
+          console.log(distance);
         }
       } catch (err) {
         console.error(err);
@@ -103,6 +150,7 @@ export default function BuildItineraryPage() {
     }
     prevStopsLenRef.current = newStops.length;
   }
+
   function ClearAll() {
     setStartCity(null);
     setStartCityId(null);
@@ -170,6 +218,16 @@ export default function BuildItineraryPage() {
         </div>
       </div>
 
+      {hasCities && stops.length > 0 && (
+        <button
+          className="download-pdf-button"
+          onClick={handleDownloadPdf}
+          disabled={downloading}
+        >
+          {downloading ? "Generating PDF…" : "Download Itinerary PDF"}
+        </button>
+      )}
+
       {/* if no cities, just show Info */}
       {!hasCities && <Info />}
 
@@ -218,7 +276,6 @@ export default function BuildItineraryPage() {
             </motion.div>
           </motion.div>
 
-          {/* Info just lives below the wrapper and is pushed down smoothly */}
           <Info />
         </>
       )}
